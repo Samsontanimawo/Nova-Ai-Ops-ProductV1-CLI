@@ -29,25 +29,36 @@ export function registerAuthCommands(program) {
 
         // Interactive login
         const inquirer = (await import('inquirer')).default;
-        const { url } = await inquirer.prompt([
-          { type: 'input', name: 'url', message: 'Nova API URL:', default: getConfig().apiUrl }
-        ]);
-        setConfig({ apiUrl: url });
+
+        // Only prompt for URL if --url was not provided
+        let apiUrl = opts.url || getConfig().apiUrl;
+        if (!opts.url) {
+          const { url } = await inquirer.prompt([
+            { type: 'input', name: 'url', message: 'Nova API URL:', default: apiUrl }
+          ]);
+          apiUrl = url;
+        }
+        // Ensure URL ends with /api
+        if (!apiUrl.endsWith('/api')) {
+          apiUrl = apiUrl.replace(/\/+$/, '') + '/api';
+        }
+        setConfig({ apiUrl });
 
         const { username, password } = await inquirer.prompt([
           { type: 'input', name: 'username', message: 'Username:' },
           { type: 'password', name: 'password', message: 'Password:', mask: '*' }
         ]);
 
-        const res = await fetch(`${url}/auth/login`, {
+        const res = await fetch(`${apiUrl}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password }),
+          redirect: 'manual',
         });
 
-        if (!res.ok) {
+        if (!res.ok && res.status !== 302) {
           const data = await res.json().catch(() => ({}));
-          throw new Error(data.error || 'Login failed');
+          throw new Error(data.error || data.message || `Login failed (HTTP ${res.status})`);
         }
 
         // Extract token from Set-Cookie header
@@ -55,11 +66,28 @@ export function registerAuthCommands(program) {
         const tokenMatch = cookies.match(/nova_token=([^;]+)/);
         if (tokenMatch) {
           setToken(tokenMatch[1]);
+        } else {
+          // Try to get token from response body
+          const data = await res.json().catch(() => ({}));
+          if (data.token) {
+            setToken(data.token);
+          }
         }
 
-        const data = await res.json();
-        setConfig({ username: data.user?.username || username, orgId: data.user?.orgId });
-        success(`Logged in as ${chalk.bold(data.user?.username || username)}`);
+        const token = getToken();
+        if (!token) {
+          throw new Error('Login succeeded but no token received. Try: nova login --token <token-from-browser>');
+        }
+
+        // Verify the token works
+        try {
+          const me = await api.get('/auth/me');
+          setConfig({ username: me.username || me.displayName || username, orgId: me.orgId });
+          success(`Logged in as ${chalk.bold(me.username || me.displayName || username)} (${me.role || 'User'})`);
+        } catch {
+          setConfig({ username, orgId: null });
+          success(`Logged in as ${chalk.bold(username)}`);
+        }
       } catch (err) {
         handleError(err);
       }
