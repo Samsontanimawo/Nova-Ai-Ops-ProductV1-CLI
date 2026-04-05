@@ -15,7 +15,7 @@ export function registerOnCallCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/oncall');
+        const data = await api.get('/oncall/now');
         const roster = Array.isArray(data) ? data : (data.schedules || data.roster || data.data || []);
         if (opts.json) { console.log(JSON.stringify(roster, null, 2)); return; }
         if (roster.length === 0) { console.log(chalk.gray('\n  No on-call schedules configured.\n')); return; }
@@ -36,7 +36,7 @@ export function registerOnCallCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/oncall/schedules');
+        const data = await api.get('/oncall/rotations');
         const schedules = Array.isArray(data) ? data : (data.schedules || data.data || []);
         if (opts.json) { console.log(JSON.stringify(schedules, null, 2)); return; }
         if (schedules.length === 0) { console.log(chalk.gray('\n  No schedules found.\n')); return; }

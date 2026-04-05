@@ -18,7 +18,7 @@ export function registerTransferCommands(program) {
     .action(async (opts) => {
       try {
         const params = opts.bucket ? `?bucket=${opts.bucket}` : '';
-        const data = await api.get(`/storage-nexus/files${params}`);
+        const data = await api.get(`/storage-nexus/buckets${params}`);
         const files = Array.isArray(data) ? data : (data.files || data.objects || data.data || []);
         if (opts.json) { console.log(JSON.stringify(files, null, 2)); return; }
         if (files.length === 0) { console.log(chalk.gray('\n  No files found.\n')); return; }

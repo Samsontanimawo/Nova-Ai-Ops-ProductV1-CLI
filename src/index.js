@@ -37,6 +37,15 @@ import { registerWebhookCommands } from './commands/webhooks.js';
 import { registerTransferCommands } from './commands/transfer.js';
 import { registerApiKeyCommands } from './commands/apikeys.js';
 import { registerChangeFreezeCommands } from './commands/changefreezes.js';
+import { registerSecretCommands } from './commands/secrets.js';
+import { registerDeploymentCommands } from './commands/deployments.js';
+import { registerSearchCommand } from './commands/search.js';
+import { registerGaugeCommands } from './commands/gauge.js';
+import { registerCorrelationCommands } from './commands/correlations.js';
+import { registerReportCommands } from './commands/reports.js';
+import { registerPlaybookCommands } from './commands/playbooks.js';
+import { registerNoteCommands } from './commands/notes.js';
+import { registerDbHealthCommands } from './commands/dbhealth.js';
 import { getConfig } from './config.js';
 
 const program = new Command();
@@ -90,6 +99,15 @@ registerWebhookCommands(program);   // webhooks list/test/create
 registerTransferCommands(program);  // transfer list/buckets/estimate
 registerApiKeyCommands(program);    // apikeys list/create/revoke
 registerChangeFreezeCommands(program); // freeze list/create/check
+registerSecretCommands(program);      // secrets list/reveal/rotate/delete
+registerDeploymentCommands(program);  // deploy status/list
+registerSearchCommand(program);       // search <query>
+registerGaugeCommands(program);       // gauge overview/health/docker
+registerCorrelationCommands(program); // correlations stats/incident
+registerReportCommands(program);      // reports list/run
+registerPlaybookCommands(program);    // playbooks list/run
+registerNoteCommands(program);        // notes list/create/view
+registerDbHealthCommands(program);    // db/health check
 
 // Config command
 program

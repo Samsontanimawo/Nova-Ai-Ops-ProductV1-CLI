@@ -21,9 +21,10 @@ export function registerAuthCommands(program) {
         if (opts.token) {
           setToken(opts.token);
           // Verify token
-          const user = await api.get('/auth/me');
+          const data = await api.get('/auth/me');
+          const user = data.user || data;
           setConfig({ username: user.username || user.displayName, orgId: user.orgId });
-          success(`Logged in as ${chalk.bold(user.username || user.displayName)} (${user.role})`);
+          success(`Logged in as ${chalk.bold(user.displayName || user.username)} (${user.role})`);
           return;
         }
 
@@ -81,9 +82,10 @@ export function registerAuthCommands(program) {
 
         // Verify the token works
         try {
-          const me = await api.get('/auth/me');
+          const meData = await api.get('/auth/me');
+          const me = meData.user || meData;
           setConfig({ username: me.username || me.displayName || username, orgId: me.orgId });
-          success(`Logged in as ${chalk.bold(me.username || me.displayName || username)} (${me.role || 'User'})`);
+          success(`Logged in as ${chalk.bold(me.displayName || me.username || username)} (${me.role || 'User'})`);
         } catch {
           setConfig({ username, orgId: null });
           success(`Logged in as ${chalk.bold(username)}`);
@@ -111,12 +113,25 @@ export function registerAuthCommands(program) {
           console.log(chalk.yellow('\n  Not logged in. Run: nova login\n'));
           return;
         }
-        const user = await api.get('/auth/me');
+        const data = await api.get('/auth/me');
+        const user = data.user || data;
+
+        // Resolve org name from orgId
+        let orgDisplay = user.orgName || user.orgId || 'N/A';
+        if (user.orgId && !user.orgName) {
+          try {
+            const orgsData = await api.get('/v1/organizations');
+            const orgs = orgsData.organizations || [];
+            const match = orgs.find(o => o.orgId === user.orgId || o.id === user.orgId);
+            if (match) orgDisplay = match.name;
+          } catch { /* fall back to orgId */ }
+        }
+
         console.log('');
-        console.log(`  ${chalk.gray('User:')}     ${chalk.bold(user.username || user.displayName)}`);
+        console.log(`  ${chalk.gray('User:')}     ${chalk.bold(user.displayName || user.username)}`);
         console.log(`  ${chalk.gray('Email:')}    ${user.email || 'N/A'}`);
         console.log(`  ${chalk.gray('Role:')}     ${user.role}`);
-        console.log(`  ${chalk.gray('Org:')}      ${user.orgId || 'N/A'}`);
+        console.log(`  ${chalk.gray('Org:')}      ${orgDisplay}`);
         console.log(`  ${chalk.gray('API:')}      ${getConfig().apiUrl}`);
         console.log('');
       } catch (err) {

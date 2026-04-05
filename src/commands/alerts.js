@@ -18,7 +18,8 @@ export function registerAlertCommands(program) {
     .action(async (opts) => {
       try {
         const data = await api.get('/alerts/rules');
-        let alerts = Array.isArray(data) ? data : (data.alerts || data.rules || data.data || []);
+        const raw = data.rules || data.alerts || data.data || data;
+        let alerts = Array.isArray(raw) ? raw : Object.values(raw || {});
 
         if (opts.firing) {
           alerts = alerts.filter(a => a.state === 'firing' || a.status === 'firing');

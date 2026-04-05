@@ -74,7 +74,9 @@ export function registerIncidentCommands(program) {
     .option('-n, --note <note>', 'Resolution note')
     .action(async (id, opts) => {
       try {
-        await api.post(`/incidents/${id}/resolve`, { note: opts.note || '' });
+        // Strip "INC-" prefix if provided — backend uses numeric IDs
+        const numericId = id.replace(/^INC-/i, '');
+        await api.post(`/incidents/${numericId}/resolve`, { note: opts.note || '' });
         success(`Incident ${id} resolved`);
       } catch (err) {
         handleError(err);
@@ -87,7 +89,8 @@ export function registerIncidentCommands(program) {
     .description('Acknowledge an incident')
     .action(async (id) => {
       try {
-        await api.post(`/incidents/${id}/acknowledge`, {});
+        const numericId = id.replace(/^INC-/i, '');
+        await api.post(`/incidents/${numericId}/acknowledge`, {});
         success(`Incident ${id} acknowledged`);
       } catch (err) {
         handleError(err);

@@ -17,18 +17,34 @@ export function registerDockerCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/integrations/docker/containers');
+        const data = await api.get('/docker/containers');
         let containers = Array.isArray(data) ? data : (data.containers || data.data || []);
         if (!opts.all) containers = containers.filter(c => (c.state || c.status || '').toLowerCase().includes('running'));
         if (opts.json) { console.log(JSON.stringify(containers, null, 2)); return; }
         if (containers.length === 0) { console.log(chalk.gray('\n  No containers found.\n')); return; }
+        // Format container name from names array or string
+        const getName = (c) => {
+          if (c.name) return c.name;
+          if (Array.isArray(c.names)) return c.names[0]?.replace(/^\//, '') || '-';
+          if (c.Names) return (Array.isArray(c.Names) ? c.Names[0] : c.Names).replace(/^\//, '');
+          return '-';
+        };
+        // Format ports array into readable string
+        const formatPorts = (ports) => {
+          if (typeof ports === 'string') return ports;
+          if (!Array.isArray(ports)) return '-';
+          return ports
+            .filter(p => p.publicPort)
+            .map(p => `${p.publicPort}->${p.privatePort}/${p.type || 'tcp'}`)
+            .join(', ') || ports.map(p => `${p.privatePort}/${p.type || 'tcp'}`).join(', ') || '-';
+        };
         console.log(createTable(
           ['Name', 'Image', 'Status', 'Ports', 'CPU', 'Memory'],
           containers.map(c => [
-            chalk.bold(c.name || c.Names || '-'),
+            chalk.bold(getName(c)),
             chalk.gray(c.image || c.Image || '-'),
             statusColor(c.state || c.status)(c.state || c.status || '-'),
-            chalk.gray(c.ports || c.Ports || '-'),
+            chalk.gray(formatPorts(c.ports || c.Ports)),
             c.cpuPercent || c.cpu || '-',
             c.memUsage || c.memory || '-',
           ])
@@ -42,7 +58,7 @@ export function registerDockerCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/integrations/docker/stats');
+        const data = await api.get('/docker/stats');
         if (opts.json) { console.log(JSON.stringify(data, null, 2)); return; }
         const stats = data.stats || data.containers || data;
         if (Array.isArray(stats)) {

@@ -16,7 +16,7 @@ export function registerRunbookCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/runbooks');
+        const data = await api.get('/runbooks/history');
         const runbooks = Array.isArray(data) ? data : (data.runbooks || data.data || []);
 
         if (opts.json) {

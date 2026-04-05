@@ -16,7 +16,7 @@ export function registerSyntheticCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/synthetic');
+        const data = await api.get('/synthetic/monitors');
         const checks = Array.isArray(data) ? data : (data.checks || data.monitors || data.data || []);
         if (opts.json) { console.log(JSON.stringify(checks, null, 2)); return; }
         if (checks.length === 0) { console.log(chalk.gray('\n  No synthetic checks configured.\n')); return; }
@@ -34,12 +34,12 @@ export function registerSyntheticCommands(program) {
     });
 
   cmd
-    .command('run [name]')
-    .description('Run a synthetic check now')
-    .action(async (name) => {
+    .command('run <id>')
+    .description('Run a synthetic monitor check now')
+    .action(async (id) => {
       try {
-        await api.post('/synthetic/run', { name: name || '' });
-        success(`Synthetic check ${name || 'all'} triggered`);
+        await api.post(`/synthetic/monitors/${encodeURIComponent(id)}/run`, {});
+        success(`Synthetic monitor ${id} triggered`);
       } catch (err) { handleError(err); }
     });
 }

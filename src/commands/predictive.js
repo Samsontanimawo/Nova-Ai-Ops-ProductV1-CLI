@@ -13,18 +13,19 @@ export function registerPredictiveCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/predictive');
-        const predictions = Array.isArray(data) ? data : (data.predictions || data.anomalies || data.data || []);
+        const data = await api.get('/predictive/anomalies');
+        const predictions = Array.isArray(data) ? data : (data.data || data.predictions || data.anomalies || []);
         if (opts.json) { console.log(JSON.stringify(predictions, null, 2)); return; }
         if (predictions.length === 0) { console.log(chalk.green('\n  No predicted incidents. Systems look stable.\n')); return; }
         console.log(createTable(
-          ['Service', 'Risk', 'Confidence', 'Signal', 'Predicted In'],
+          ['Service', 'Metric', 'Severity', 'Value', 'Expected', 'Detected'],
           predictions.map(p => [
-            chalk.bold(p.service || p.name || '-'),
-            severityColor(p.risk || p.severity)(p.risk || p.severity || '-'),
-            `${Math.round((p.confidence || 0) * 100)}%`,
-            truncate(p.signal || p.metric || p.description || '-', 30),
-            p.predictedIn || p.eta || '-',
+            chalk.bold(truncate(p.service_name || p.service || p.name || '-', 30)),
+            chalk.gray(truncate(p.metric_name || p.metric || '-', 28)),
+            severityColor(p.severity)(p.severity || '-'),
+            chalk.yellow(String(p.detected_value != null ? Number(p.detected_value).toFixed(1) : '-')),
+            chalk.gray(String(p.expected_value != null ? Number(p.expected_value).toFixed(1) : '-')),
+            chalk.gray(p.detected_at || '-'),
           ])
         ));
       } catch (err) { handleError(err); }

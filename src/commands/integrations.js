@@ -15,16 +15,18 @@ export function registerIntegrationCommands(program) {
     .action(async (opts) => {
       try {
         const data = await api.get('/integrations');
-        const integrations = Array.isArray(data) ? data : (data.integrations || data.data || []);
+        const raw = data.integrations || data.data || data;
+        // API returns { integrations: { docker: {...}, slack: {...}, ... } } — normalize to array
+        const integrations = Array.isArray(raw) ? raw : Object.entries(raw).map(([key, val]) => ({ name: key, ...val }));
         if (opts.json) { console.log(JSON.stringify(integrations, null, 2)); return; }
         if (integrations.length === 0) { console.log(chalk.gray('\n  No integrations configured.\n')); return; }
         console.log(createTable(
-          ['Integration', 'Status', 'Type', 'Last Sync'],
+          ['Integration', 'Status', 'Type', 'Enabled'],
           integrations.map(i => [
             chalk.bold(i.name || i.integration || '-'),
-            statusColor(i.status)(i.status || '-'),
+            i.enabled ? chalk.green('connected') : chalk.gray('disabled'),
             chalk.gray(i.type || i.provider || '-'),
-            i.lastSync || i.last_sync || chalk.gray('Never'),
+            i.enabled ? chalk.green('Yes') : chalk.gray('No'),
           ])
         ));
       } catch (err) { handleError(err); }

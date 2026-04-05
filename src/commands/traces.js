@@ -22,7 +22,7 @@ export function registerTraceCommands(program) {
         const params = new URLSearchParams({ limit: opts.limit });
         if (opts.service) params.set('service', opts.service);
         if (opts.minDuration) params.set('minDuration', opts.minDuration);
-        const data = await api.get(`/tracing?${params}`);
+        const data = await api.get(`/traces?${params}`);
         const traces = Array.isArray(data) ? data : (data.traces || data.data || []);
         if (opts.json) { console.log(JSON.stringify(traces, null, 2)); return; }
         if (traces.length === 0) { console.log(chalk.gray('\n  No traces found.\n')); return; }

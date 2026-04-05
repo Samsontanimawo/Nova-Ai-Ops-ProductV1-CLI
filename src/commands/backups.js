@@ -16,18 +16,17 @@ export function registerBackupCommands(program) {
     .option('--json', 'Output as JSON')
     .action(async (opts) => {
       try {
-        const data = await api.get('/backups');
+        const data = await api.get('/database-vault/history');
         const backups = Array.isArray(data) ? data : (data.backups || data.data || []);
         if (opts.json) { console.log(JSON.stringify(backups, null, 2)); return; }
         if (backups.length === 0) { console.log(chalk.gray('\n  No backups found.\n')); return; }
         console.log(createTable(
-          ['ID', 'Type', 'Size', 'Status', 'Created'],
+          ['Filename', 'Size', 'Date', 'Time'],
           backups.map(b => [
-            chalk.gray(String(b.id || '').slice(0, 8)),
-            chalk.cyan(b.type || b.backupType || 'full'),
-            b.size || b.fileSize || '-',
-            b.status === 'completed' ? chalk.green('Completed') : b.status === 'failed' ? chalk.red('Failed') : chalk.yellow(b.status || '-'),
-            timeAgo(b.createdAt || b.created_at),
+            chalk.bold(b.filename || b.id || '-'),
+            chalk.cyan(b.sizeFormatted || b.size || b.fileSize || '-'),
+            chalk.gray(b.date || '-'),
+            chalk.gray(b.time || '-'),
           ])
         ));
       } catch (err) { handleError(err); }
