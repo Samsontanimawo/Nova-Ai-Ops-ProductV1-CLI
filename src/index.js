@@ -28,6 +28,15 @@ import { registerPostmortemCommands } from './commands/postmortem.js';
 import { registerIntegrationCommands } from './commands/integrations.js';
 import { registerTenantCommands } from './commands/tenants.js';
 import { registerPredictiveCommands } from './commands/predictive.js';
+import { registerDashboardCommands } from './commands/dashboard.js';
+import { registerNotificationCommands } from './commands/notifications.js';
+import { registerEscalationCommands } from './commands/escalation.js';
+import { registerDockerCommands } from './commands/docker.js';
+import { registerTaskCommands } from './commands/tasks.js';
+import { registerWebhookCommands } from './commands/webhooks.js';
+import { registerTransferCommands } from './commands/transfer.js';
+import { registerApiKeyCommands } from './commands/apikeys.js';
+import { registerChangeFreezeCommands } from './commands/changefreezes.js';
 import { getConfig } from './config.js';
 
 const program = new Command();
@@ -72,6 +81,15 @@ registerPostmortemCommands(program); // postmortem list/create
 registerIntegrationCommands(program); // integrations status
 registerTenantCommands(program);   // tenants list/create
 registerPredictiveCommands(program); // predict (ML anomaly detection)
+registerDashboardCommands(program);  // dashboard summary/watch
+registerNotificationCommands(program); // notifications list/read-all/count
+registerEscalationCommands(program); // escalation list/trigger
+registerDockerCommands(program);    // docker ps/stats
+registerTaskCommands(program);      // tasks list/create/done (Sprinta)
+registerWebhookCommands(program);   // webhooks list/test/create
+registerTransferCommands(program);  // transfer list/buckets/estimate
+registerApiKeyCommands(program);    // apikeys list/create/revoke
+registerChangeFreezeCommands(program); // freeze list/create/check
 
 // Config command
 program

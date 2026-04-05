@@ -28,6 +28,15 @@ Full reference for every command available in the Nova AI Ops CLI.
 - [Integrations](#integrations)
 - [Tenants](#tenants)
 - [Predictive Detection](#predictive-detection)
+- [Dashboard](#dashboard)
+- [Notifications](#notifications)
+- [Escalation Policies](#escalation-policies)
+- [Docker](#docker)
+- [Tasks (Sprinta)](#tasks-sprinta)
+- [Webhooks](#webhooks)
+- [File Transfer](#file-transfer)
+- [API Keys](#api-keys)
+- [Change Freezes](#change-freezes)
 - [Configuration](#configuration)
 - [Utility Commands](#utility-commands)
 - [Global Options](#global-options)
@@ -810,6 +819,233 @@ nova predict --json
 ```
 
 Shows predicted incidents with risk level, confidence score, signal type, and estimated time to impact.
+
+---
+
+## Dashboard
+
+### `nova dashboard summary`
+
+Show golden signals — latency, traffic, error rate, CPU, memory.
+
+```bash
+nova dashboard summary
+nova dash s --json
+```
+
+### `nova dashboard watch`
+
+Live dashboard that refreshes every 5 seconds. Shows real-time golden signals.
+
+```bash
+nova dashboard watch
+# Ctrl+C to stop
+```
+
+---
+
+## Notifications
+
+### `nova notifications list`
+
+```bash
+nova notifications list
+nova notif ls --unread
+nova notif ls --limit 50 --json
+```
+
+### `nova notifications count`
+
+```bash
+nova notif count
+#   3 unread notification(s)
+```
+
+### `nova notifications read-all`
+
+```bash
+nova notif read-all
+#   ✓ All notifications marked as read
+```
+
+---
+
+## Escalation Policies
+
+### `nova escalation list`
+
+```bash
+nova escalation list
+nova esc ls --json
+```
+
+### `nova escalation trigger`
+
+Manually trigger an escalation policy.
+
+```bash
+nova escalation trigger POLICY-01 --incident INC-42 --reason "Customer impact detected"
+```
+
+---
+
+## Docker
+
+### `nova docker ps`
+
+List running containers (from Docker integration).
+
+```bash
+nova docker ps
+nova docker ps --all      # Include stopped
+nova docker ps --json
+```
+
+### `nova docker stats`
+
+Show container resource usage (CPU, memory, network, disk I/O).
+
+```bash
+nova docker stats
+nova docker stats --json
+```
+
+---
+
+## Tasks (Sprinta)
+
+### `nova tasks list`
+
+```bash
+nova tasks list
+nova sprinta ls --status in-progress
+nova tasks list --assigned john --json
+```
+
+### `nova tasks create`
+
+```bash
+nova tasks create --title "Fix login timeout" --priority high --assign jane --due 2026-04-10
+```
+
+### `nova tasks done`
+
+```bash
+nova tasks done TASK-42
+#   ✓ Task TASK-42 marked as done
+```
+
+---
+
+## Webhooks
+
+### `nova webhooks list`
+
+```bash
+nova webhooks list
+nova wh ls --json
+```
+
+### `nova webhooks create`
+
+```bash
+nova webhooks create --url https://hooks.slack.com/xxx --name "Slack Alerts" --events incident.created,alert.fired
+```
+
+### `nova webhooks test`
+
+```bash
+nova webhooks test WH-01
+#   ✓ Test webhook sent to WH-01
+```
+
+---
+
+## File Transfer
+
+### `nova transfer list`
+
+```bash
+nova transfer list
+nova transfer list --bucket my-backups --json
+```
+
+### `nova transfer buckets`
+
+```bash
+nova transfer buckets
+nova transfer buckets --json
+```
+
+### `nova transfer estimate`
+
+Estimate cross-cloud transfer cost.
+
+```bash
+nova transfer estimate --size 50 --from us-east-1 --to eu-west-1 --provider aws
+#   Transfer Cost Estimate
+#   Size:       50 GB
+#   Route:      us-east-1 → eu-west-1
+#   Provider:   aws
+#   Estimated: $4.5000
+```
+
+---
+
+## API Keys
+
+### `nova apikeys list`
+
+```bash
+nova apikeys list
+nova keys ls --json
+```
+
+### `nova apikeys create`
+
+```bash
+nova apikeys create --name "CI Pipeline" --scopes read,write --expires 90
+#   API Key Created
+#   Name:  CI Pipeline
+#   Key:   nova_sk_a1b2c3d4e5f6...
+#   Save this key now — it won't be shown again.
+```
+
+### `nova apikeys revoke`
+
+```bash
+nova apikeys revoke KEY-ID
+#   ✓ API key KEY-ID revoked
+```
+
+---
+
+## Change Freezes
+
+### `nova freeze list`
+
+```bash
+nova freeze list
+nova maintenance ls --json
+```
+
+### `nova freeze create`
+
+```bash
+nova freeze create --name "Q1 Release Freeze" --start 2026-04-10T00:00:00Z --end 2026-04-12T00:00:00Z --reason "Quarterly release"
+```
+
+### `nova freeze check`
+
+Check if a change freeze is currently active. **Returns exit code 1 if frozen** — use in CI/CD to gate deployments.
+
+```bash
+nova freeze check
+#   ✓ No active change freezes. Safe to deploy.
+
+# In CI/CD:
+nova freeze check || echo "BLOCKED: Change freeze active"
+```
 
 ---
 
