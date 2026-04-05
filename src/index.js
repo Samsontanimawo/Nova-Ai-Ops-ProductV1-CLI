@@ -16,6 +16,18 @@ import { registerRunbookCommands } from './commands/runbooks.js';
 import { registerSLOCommands } from './commands/slo.js';
 import { registerStatusCommand } from './commands/status.js';
 import { registerMetricsCommands } from './commands/metrics.js';
+import { registerLogCommands } from './commands/logs.js';
+import { registerTraceCommands } from './commands/traces.js';
+import { registerOnCallCommands } from './commands/oncall.js';
+import { registerTeamCommands } from './commands/teams.js';
+import { registerBackupCommands } from './commands/backups.js';
+import { registerAuditCommands } from './commands/audit.js';
+import { registerCertCommands } from './commands/certs.js';
+import { registerSyntheticCommands } from './commands/synthetic.js';
+import { registerPostmortemCommands } from './commands/postmortem.js';
+import { registerIntegrationCommands } from './commands/integrations.js';
+import { registerTenantCommands } from './commands/tenants.js';
+import { registerPredictiveCommands } from './commands/predictive.js';
 import { getConfig } from './config.js';
 
 const program = new Command();
@@ -48,6 +60,18 @@ registerAgentCommands(program);    // agent status/install
 registerRunbookCommands(program);  // runbooks list/run
 registerSLOCommands(program);      // slo check
 registerMetricsCommands(program);  // metrics query/push
+registerLogCommands(program);      // logs search/tail
+registerTraceCommands(program);    // traces list
+registerOnCallCommands(program);   // oncall who/list
+registerTeamCommands(program);     // teams list/invite
+registerBackupCommands(program);   // backups list/create/restore
+registerAuditCommands(program);    // audit run/results/ssl
+registerCertCommands(program);     // certs (SSL status)
+registerSyntheticCommands(program); // synthetic list/run
+registerPostmortemCommands(program); // postmortem list/create
+registerIntegrationCommands(program); // integrations status
+registerTenantCommands(program);   // tenants list/create
+registerPredictiveCommands(program); // predict (ML anomaly detection)
 
 // Config command
 program

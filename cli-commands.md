@@ -16,6 +16,18 @@ Full reference for every command available in the Nova AI Ops CLI.
 - [Agents](#agents)
 - [Runbooks](#runbooks)
 - [Metrics](#metrics)
+- [Logs](#logs)
+- [Traces](#traces)
+- [On-Call](#on-call)
+- [Teams](#teams)
+- [Backups](#backups)
+- [Page Audit](#page-audit)
+- [SSL Certificates](#ssl-certificates)
+- [Synthetic Monitoring](#synthetic-monitoring)
+- [Postmortems](#postmortems)
+- [Integrations](#integrations)
+- [Tenants](#tenants)
+- [Predictive Detection](#predictive-detection)
 - [Configuration](#configuration)
 - [Utility Commands](#utility-commands)
 - [Global Options](#global-options)
@@ -485,6 +497,319 @@ nova metrics push deploy.success 1 --tags branch:main,version:2.3.1
 | Flag | Description |
 |------|-------------|
 | `--tags <tags>` | Comma-separated key:value tags |
+
+---
+
+## Logs
+
+### `nova logs search`
+
+Search logs by keyword with filters.
+
+```bash
+# Search logs
+nova logs search "error"
+nova logs search "timeout" --service api-gateway --level error
+nova logs search "connection refused" --last 24h --limit 50
+
+# JSON output
+nova logs search "error" --json
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `-l, --limit <n>` | Max results (default: 20) |
+| `--service <name>` | Filter by service |
+| `--level <level>` | Filter: `error`, `warn`, `info`, `debug` |
+| `--last <duration>` | Time window: `1h`, `6h`, `24h`, `7d` (default: `1h`) |
+| `--json` | Output as JSON |
+
+### `nova logs tail`
+
+Stream logs in real-time (polls every 5 seconds).
+
+```bash
+# Tail all logs
+nova logs tail
+
+# Filter by service
+nova logs tail --service payment-api
+
+# Filter by level
+nova logs tail --level error
+```
+
+---
+
+## Traces
+
+### `nova traces list`
+
+List distributed traces.
+
+```bash
+nova traces list
+nova trace ls --service api-gateway
+nova traces list --min-duration 500 --limit 10
+nova traces list --json
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--service <name>` | Filter by service |
+| `-l, --limit <n>` | Max results (default: 20) |
+| `--min-duration <ms>` | Minimum duration filter |
+| `--json` | Output as JSON |
+
+---
+
+## On-Call
+
+### `nova oncall who`
+
+Show who is currently on-call.
+
+```bash
+nova oncall who
+#   ● John Smith — Platform Team  until 04/07 9:00 AM
+#   ● Jane Doe — Backend Team  until 04/06 6:00 PM
+
+nova oncall who --json
+```
+
+### `nova oncall list`
+
+List all on-call schedules and rotations.
+
+```bash
+nova oncall list
+nova oncall ls --json
+```
+
+---
+
+## Teams
+
+### `nova teams list`
+
+List all team members with roles.
+
+```bash
+nova teams list
+nova teams ls --json
+```
+
+### `nova teams invite`
+
+Invite a new team member.
+
+```bash
+nova teams invite engineer@company.com
+nova teams invite admin@company.com --role Admin
+nova teams invite viewer@company.com --role Viewer
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `-r, --role <role>` | Role: `Viewer`, `Engineer`, `Admin` (default: `Engineer`) |
+
+---
+
+## Backups
+
+### `nova backups list`
+
+List all database backups.
+
+```bash
+nova backups list
+nova backup ls --json
+```
+
+### `nova backups create`
+
+Create a new backup.
+
+```bash
+nova backups create
+nova backups create --type incremental
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `--type <type>` | `full` or `incremental` (default: `full`) |
+
+### `nova backups restore`
+
+Restore from a backup.
+
+```bash
+# Interactive confirmation
+nova backups restore BACKUP-ID
+
+# Skip confirmation (for scripts)
+nova backups restore BACKUP-ID --confirm
+```
+
+---
+
+## Page Audit
+
+### `nova audit run`
+
+Trigger a page health audit across all platform pages.
+
+```bash
+nova audit run
+#   ● Health Score: 100%
+#   Pages: 34/34 passed, 0 failed, 0 warnings
+#   Avg Response: 4ms
+#   Duration: 2s
+```
+
+### `nova audit results`
+
+Show the latest audit results.
+
+```bash
+nova audit results
+nova audit results --json
+```
+
+### `nova audit ssl`
+
+Check SSL certificate status.
+
+```bash
+nova audit ssl
+#   ● novaaiops.com — 40 days remaining (Let's Encrypt)
+```
+
+---
+
+## SSL Certificates
+
+### `nova certs`
+
+Show SSL/TLS certificate status for all monitored domains.
+
+```bash
+nova certs
+nova certificates --json
+```
+
+---
+
+## Synthetic Monitoring
+
+### `nova synthetic list`
+
+List all synthetic monitoring checks.
+
+```bash
+nova synthetic list
+nova synth ls --json
+```
+
+### `nova synthetic run`
+
+Trigger a synthetic check immediately.
+
+```bash
+# Run all checks
+nova synthetic run
+
+# Run a specific check
+nova synthetic run "Homepage Check"
+```
+
+---
+
+## Postmortems
+
+### `nova postmortem list`
+
+List post-incident reviews.
+
+```bash
+nova postmortem list
+nova pm ls --limit 10
+nova postmortem list --json
+```
+
+### `nova postmortem create`
+
+Create a postmortem for an incident.
+
+```bash
+nova postmortem create INC-42
+nova postmortem create INC-42 --title "Database outage root cause analysis"
+```
+
+---
+
+## Integrations
+
+### `nova integrations`
+
+Check the status of all configured integrations.
+
+```bash
+nova integrations
+nova int --json
+```
+
+---
+
+## Tenants
+
+### `nova tenants list`
+
+List all organizations (admin only).
+
+```bash
+nova tenants list
+nova orgs ls --json
+```
+
+### `nova tenants create`
+
+Create a new organization.
+
+```bash
+nova tenants create --name "Acme Corp"
+nova tenants create --name "Startup Inc" --plan starter
+```
+
+**Options:**
+
+| Flag | Description |
+|------|-------------|
+| `-n, --name <name>` | Organization name (required) |
+| `--plan <plan>` | Plan: `free`, `starter`, `professional`, `enterprise` (default: `free`) |
+
+---
+
+## Predictive Detection
+
+### `nova predict`
+
+Show ML-based predictive incident detection results.
+
+```bash
+nova predict
+nova predict --json
+```
+
+Shows predicted incidents with risk level, confidence score, signal type, and estimated time to impact.
 
 ---
 
